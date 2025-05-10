@@ -1,0 +1,14 @@
+# Core libraries
+jax
+jaxlib
+flax
+optax
+numpy
+
+# Data loading and processing
+tensorflow
+tensorflow-datasets
+
+# Visualization and utilities
+matplotlib
+tqdm
