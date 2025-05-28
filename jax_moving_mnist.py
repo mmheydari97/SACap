@@ -4,12 +4,10 @@ import flax.linen as nn
 import optax
 import numpy as np
 from flax.training import train_state
-from functools import partial
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import matplotlib.pyplot as plt
 import os
-import time
 from tqdm.auto import tqdm
 
 # Check for GPU availability
@@ -327,8 +325,8 @@ def train_model(num_epochs=5, batch_size=8, seq_len=4, learning_rate=5e-4):
     train_ds, test_ds = load_moving_mnist(
         batch_size=batch_size,
         seq_len=seq_len,
-        train_samples=500,
-        test_samples=100
+        train_samples=5000,
+        test_samples=1000
     )
     
     # Initialize
@@ -381,13 +379,14 @@ def train_model(num_epochs=5, batch_size=8, seq_len=4, learning_rate=5e-4):
     return state, train_losses, test_losses
 
 
+
 if __name__ == "__main__":
     # Train with small settings for testing
     state, train_losses, test_losses = train_model(
-        num_epochs=5,
-        batch_size=8,
-        seq_len=4,
-        learning_rate=5e-4
+        num_epochs=300,
+        batch_size=16,
+        seq_len=16,
+        learning_rate=1e-4
     )
 
     print(f"\nTraining completed!")
