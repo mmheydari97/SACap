@@ -16,6 +16,57 @@ from tqdm.auto import tqdm
 print("JAX devices:", jax.devices())
 print("Using device:", jax.devices()[0])
 
+def visualize_results(train_losses, test_losses, inputs, targets, predictions, seq_len):
+    """Create visualization plots."""
+    os.makedirs('results', exist_ok=True)
+    
+    # Loss curves
+    plt.figure(figsize=(10, 6))
+    plt.plot(train_losses, 'b-', label='Training Loss')
+    plt.plot(test_losses, 'r-', label='Test Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('MSE Loss')
+    plt.title('Training Progress - Capsule Transformer')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('results/loss_curves.png')
+    plt.close()
+    
+    # Predictions
+    for batch_idx in range(min(3, len(predictions))):
+        fig, axes = plt.subplots(4, 4, figsize=(12, 12))
+        
+        for i in range(min(4, inputs[batch_idx].shape[0])):
+            # Last 2 input frames
+            for j in range(2):
+                idx = seq_len - 2 + j
+                ax = axes[i, j]
+                img = (inputs[batch_idx][i, idx].squeeze() + 1.0) / 2.0
+                ax.imshow(img, cmap='gray', vmin=0, vmax=1)
+                ax.set_title(f'Input {idx+1}')
+                ax.axis('off')
+            
+            # Ground truth
+            ax = axes[i, 2]
+            gt = (targets[batch_idx][i].squeeze() + 1.0) / 2.0
+            ax.imshow(gt, cmap='gray', vmin=0, vmax=1)
+            ax.set_title('Ground Truth')
+            ax.axis('off')
+            
+            # Prediction
+            ax = axes[i, 3]
+            pred = (predictions[batch_idx][i].squeeze() + 1.0) / 2.0
+            ax.imshow(pred, cmap='gray', vmin=0, vmax=1)
+            ax.set_title('Prediction')
+            ax.axis('off')
+        
+        plt.tight_layout()
+        plt.savefig(f'results/predictions_batch_{batch_idx+1}.png', dpi=150)
+        plt.close()
+    
+    print("Results saved in 'results' directory!")
+
+
 # Memory-efficient Capsule Layer
 class CapsuleLayer(nn.Module):
     num_capsules: int
@@ -329,55 +380,6 @@ def train_model(num_epochs=5, batch_size=8, seq_len=4, learning_rate=5e-4):
     
     return state, train_losses, test_losses
 
-def visualize_results(train_losses, test_losses, inputs, targets, predictions, seq_len):
-    """Create visualization plots."""
-    os.makedirs('results', exist_ok=True)
-    
-    # Loss curves
-    plt.figure(figsize=(10, 6))
-    plt.plot(train_losses, 'b-', label='Training Loss')
-    plt.plot(test_losses, 'r-', label='Test Loss')
-    plt.xlabel('Epoch')
-    plt.ylabel('MSE Loss')
-    plt.title('Training Progress - Capsule Transformer')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig('results/loss_curves.png')
-    plt.close()
-    
-    # Predictions
-    for batch_idx in range(min(3, len(predictions))):
-        fig, axes = plt.subplots(4, 4, figsize=(12, 12))
-        
-        for i in range(min(4, inputs[batch_idx].shape[0])):
-            # Last 2 input frames
-            for j in range(2):
-                idx = seq_len - 2 + j
-                ax = axes[i, j]
-                img = (inputs[batch_idx][i, idx].squeeze() + 1.0) / 2.0
-                ax.imshow(img, cmap='gray', vmin=0, vmax=1)
-                ax.set_title(f'Input {idx+1}')
-                ax.axis('off')
-            
-            # Ground truth
-            ax = axes[i, 2]
-            gt = (targets[batch_idx][i].squeeze() + 1.0) / 2.0
-            ax.imshow(gt, cmap='gray', vmin=0, vmax=1)
-            ax.set_title('Ground Truth')
-            ax.axis('off')
-            
-            # Prediction
-            ax = axes[i, 3]
-            pred = (predictions[batch_idx][i].squeeze() + 1.0) / 2.0
-            ax.imshow(pred, cmap='gray', vmin=0, vmax=1)
-            ax.set_title('Prediction')
-            ax.axis('off')
-        
-        plt.tight_layout()
-        plt.savefig(f'results/predictions_batch_{batch_idx+1}.png', dpi=150)
-        plt.close()
-    
-    print("Results saved in 'results' directory!")
 
 if __name__ == "__main__":
     # Train with small settings for testing
