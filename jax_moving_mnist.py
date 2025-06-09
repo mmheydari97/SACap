@@ -266,7 +266,9 @@ def create_train_state(rng, learning_rate, seq_len=4):
 def load_moving_mnist(batch_size=8, seq_len=4, train_samples=500, test_samples=100):
     """Load Moving MNIST dataset."""
     
-    dataset = tfds.load('moving_mnist', split='test', shuffle_files=True)
+    # Load training and test splits separately to avoid training on test data
+    train_ds = tfds.load('moving_mnist', split='train', shuffle_files=True)
+    test_ds = tfds.load('moving_mnist', split='test', shuffle_files=True)
     
     def preprocess(example):
         sequence = example['image_sequence']
@@ -301,15 +303,13 @@ def load_moving_mnist(batch_size=8, seq_len=4, train_samples=500, test_samples=1
         
         return inputs, target
     
-    # Process dataset
-    dataset = dataset.map(preprocess, num_parallel_calls=tf.data.AUTOTUNE)
-    
-    # Create splits
-    total_samples = train_samples + test_samples
-    dataset = dataset.take(total_samples).cache()
-    
-    train_ds = dataset.take(train_samples)
-    test_ds = dataset.skip(train_samples)
+    # Process datasets independently
+    train_ds = train_ds.map(preprocess, num_parallel_calls=tf.data.AUTOTUNE)
+    test_ds = test_ds.map(preprocess, num_parallel_calls=tf.data.AUTOTUNE)
+
+    # Limit number of samples if requested
+    train_ds = train_ds.take(train_samples).cache()
+    test_ds = test_ds.take(test_samples).cache()
     
     # Batch
     train_ds = train_ds.batch(batch_size, drop_remainder=True).prefetch(2)

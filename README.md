@@ -75,7 +75,7 @@ The model is trained and evaluated on the **Moving MNIST** dataset. This dataset
     4.  Ensures frames are single-channel (grayscale).
     5.  Normalizes pixel values to the range `[-1.0, 1.0]`.
     6.  Splits sequences into `inputs` (first `seq_len` frames) and `target` (the `(seq_len + 1)`-th frame).
-  * **Data Splits:** The `load_moving_mnist` function creates training and testing datasets. The number of samples for each can be configured (default: 5000 train, 1000 test).
+  * **Data Splits:** The `load_moving_mnist` function loads the standard `train` and `test` splits separately and can limit the number of samples from each (default: 5000 train, 1000 test).
   * **Batching:** The datasets are batched and prefetched for efficient training.
 
 -----
